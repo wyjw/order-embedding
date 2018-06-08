@@ -19,12 +19,18 @@ def init_params(options):
     # Word embedding
     params['Wemb'] = norm_weight(options['n_words'], options['dim_word'])
 
+
     # Sentence encoder
     params = get_layer(options['encoder'])[0](options, params, prefix='encoder',
                                               nin=options['dim_word'], dim=options['dim'])
 
+    #Time embedding
+    params = get_layer('ff')[0](options, params, prefix = 'ff_time', nin=options['dim_image'], nout=options['dim'])
+
+    '''
     # Image encoder
     params = get_layer('ff')[0](options, params, prefix='ff_image', nin=options['dim_image'], nout=options['dim'])
+    '''
 
     return params
 
@@ -61,6 +67,9 @@ def contrastive_loss(s, im, options):
 
     return cost_tot.sum()
 
+def encode_time(tparams, options, x, mask):
+
+
 
 def encode_sentences(tparams, options, x, mask):
     n_timesteps = x.shape[0]
@@ -87,7 +96,10 @@ def encode_images(tparams, options, im):
 
     return im_emb
 
-
+def encode_time(tparams, options, time):
+    time_emb = get_layer('ff')[1](tparams, im, None, options, prefix = 'encoder', mask = mask)
+    time_emb = l2norm(im_emb)
+    return time_emb
 
 
 def build_model(tparams, options):
@@ -125,7 +137,7 @@ def build_image_encoder(tparams, options):
     """
     # image features
     im = tensor.matrix('im', dtype='float32')
-    
+
     return [im], encode_images(tparams, options, im)
 
 
@@ -146,6 +158,3 @@ def build_errors(options):
         errs = - tensor.dot(s_emb, im_emb.T)
 
     return [s_emb, im_emb], errs
-
-
-

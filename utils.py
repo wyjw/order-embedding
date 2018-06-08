@@ -5,8 +5,14 @@ import theano
 import theano.tensor as tensor
 import numpy
 import warnings
+import pandas
+import math
 
 from collections import OrderedDict
+
+def load_dataset(path):
+    dataframe = pandas.read_csv(path, usecols = [1], engine = 'python', skipfooter = 3)
+    
 
 def zipp(params, tparams):
     """
@@ -26,7 +32,7 @@ def unzip(zipped):
 
 def itemlist(tparams):
     """
-    Get the list of parameters. 
+    Get the list of parameters.
     Note that tparams must be OrderedDict
     """
     return [vv for kk, vv in tparams.iteritems()]
@@ -146,4 +152,3 @@ def concatenate(tensor_list, axis=0):
         offset += tt.shape[axis]
 
     return out
-
